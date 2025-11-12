@@ -5,7 +5,10 @@ Este projeto documenta a construção de um Laboratório de Security Operations 
 ## 📌 Fase 1: Arquitetura e Infraestrutura 
 
 ### 1. Arquitetura Lógica
-Antes do deploy, foi desenhada a topologia da rede para entender o fluxo de dados. O laboratório simula um ambiente corporativo real contendo:
+Antes do deploy, foi desenhada a topologia da rede para entender o fluxo de dados e posicionamento dos sensores. O laboratório simula um ambiente corporativo real contendo:
+
+![Topologia de Rede](images/00-network-topology.png)
+*Diagrama da arquitetura do laboratório desenhado durante o planejamento.*
 * **VPC (Virtual Private Cloud):** Para isolamento da rede.
 * **SIEM (ELK Stack):** O coração do monitoramento.
 * **Endpoints (Windows/Linux):** Alvos que serão monitorados e atacados.
