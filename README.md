@@ -81,3 +81,47 @@ Meu provedor de internet altera o IP frequentemente, o que bloqueava meu acesso 
 
 ---
 **Próximos Passos:** Instalação do Kibana e Visualização de Dados.
+---
+## 📌 Fase 2: Visualização de Dados com Kibana 
+
+Com o backend de logs (Elasticsearch) funcional, o próximo passo foi implementar o **Kibana**, a interface gráfica que permitirá a visualização dos dados, criação de dashboards e investigação de alertas de segurança.
+
+### 1. Instalação e Exposição do Serviço
+O Kibana foi instalado no mesmo servidor Ubuntu. Diferente do Elasticsearch (Backend), o Kibana precisa ser acessível via navegador.
+
+**Configuração de Rede (`kibana.yml`):**
+Editei o arquivo de configuração para alterar o `server.host`. Por padrão, ele vem travado em `localhost`. Configurei para ouvir no IP público do servidor, permitindo o acesso remoto à interface web na porta padrão `5601`.
+
+![Configuração Kibana](images/06-kibana-config-yaml.png)
+*Ajuste do binding de rede para permitir acesso externo à interface web.*
+
+**Validação do Serviço:**
+Após a configuração, o serviço foi iniciado e verificado via SystemD para garantir que não houvesse erros de *bootstrap*.
+
+![Status do Serviço](images/07-kibana-service-status.png)
+*Serviço do Kibana ativo e rodando (Active/Running).*
+
+### 2. Conexão Segura (Enrollment Token)
+Para conectar o Kibana ao Elasticsearch de forma segura, utilizei o mecanismo de **Enrollment Tokens**. Isso garante que a comunicação entre a interface e o banco de dados seja autenticada e criptografada, prevenindo interceptação de dados.
+
+![Geração de Token](images/08-security-enrollment.png)
+*Geração do token de inscrição para pareamento seguro entre Kibana e Elasticsearch.*
+
+---
+
+### ⚠️ Desafios e Soluções (Troubleshooting)
+
+**1. Bloqueio de Firewall e Portas Reservadas**
+Ao tentar acessar a interface web (`http://IP:5601`), recebi erros de *Connection Timed Out*. Diagnostiquei que o Firewall da Cloud (Vultr) estava bloqueando a porta 5601.
+Ao tentar liberar o tráfego TCP, cometi um erro ao definir o range de portas iniciando em `0` (`0-65535`), o que foi rejeitado pela plataforma.
+
+![Erro Firewall](images/98-troubleshooting-firewall-error.png)
+*Erro ao tentar configurar regra de firewall com porta inválida (0).*
+
+* **Solução:** Ajustei a regra para um range válido (`1-65535`) e configurei o acesso temporário para `Anywhere` (0.0.0.0/0) para fins de teste de conectividade, liberando o acesso ao painel do Kibana.
+
+![Firewall Corrigido](images/09-firewall-fixed-kibana.png)
+*Regra de firewall corrigida permitindo tráfego TCP na porta do Kibana.*
+
+---
+**Próximos Passos:** Configuração dos Agentes e Ingestão de Logs.
