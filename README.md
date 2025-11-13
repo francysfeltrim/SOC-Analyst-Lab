@@ -71,17 +71,13 @@ Ao tentar provisionar a máquina de 16GB, fui bloqueada pela política de cota p
 
 * **Solução:** Realizei o *downsizing* estratégico para uma instância de 8GB RAM e otimizei o servidor. Isso permitiu continuar o laboratório dentro do orçamento e das limitações da conta, sem perder funcionalidade crítica.
 
-**2. VPC 2.0 vs VPC Networks**
-O tutorial original referenciava uma tecnologia depreciada (VPC 2.0).
-* **Solução:** Migrei para a nova arquitetura de "VPC Networks" da Vultr, garantindo que a região fosse idêntica à da VM (Toronto) para haver conectividade entre os segmentos de rede.
-
 **3. IP Dinâmico (CGNAT)**
 Meu provedor de internet altera o IP frequentemente, o que bloqueava meu acesso às regras restritas do Firewall.
 * **Solução:** Aprendi a monitorar meu IP público e atualizar as regras de *Ingress* dinamicamente. Para testes de conectividade rápida, gerenciei o risco temporariamente via regras "Anywhere" combinadas com a autenticação forte nativa do Elastic.
 
 ---
 **Próximos Passos:** Instalação do Kibana e Visualização de Dados.
----
+
 ## 📌 Fase 2: Visualização de Dados com Kibana 
 
 Com o backend de logs (Elasticsearch) funcional, o próximo passo foi implementar o **Kibana**, a interface gráfica que permitirá a visualização dos dados, criação de dashboards e investigação de alertas de segurança.
