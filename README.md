@@ -76,7 +76,6 @@ Meu provedor de internet altera o IP frequentemente, o que bloqueava meu acesso 
 * **Solução:** Aprendi a monitorar meu IP público e atualizar as regras de *Ingress* dinamicamente. Para testes de conectividade rápida, gerenciei o risco temporariamente via regras "Anywhere" combinadas com a autenticação forte nativa do Elastic.
 
 ---
-**Próximos Passos:** Instalação do Kibana e Visualização de Dados.
 
 ## 📌 Fase 2: Visualização de Dados com Kibana 
 
@@ -147,4 +146,29 @@ Ao tentar liberar o tráfego TCP, cometi um erro ao definir o range de portas in
 *Regra de firewall corrigida permitindo tráfego TCP na porta do Kibana.*
 
 ---
-**Próximos Passos:** Provisionamento do Servidor Windows (Vítima).
+
+## 📌 Fase 3: Vítima e Hardening 
+
+Para simular um cenário real de ataque, provisionei um servidor Windows Server 2022 exposto à internet. Este servidor atuará como o *endpoint* monitorado e alvo das simulações de ataque.
+
+### 1. Arquitetura de Segurança (Isolamento)
+Diferente dos componentes do SIEM (ELK), decidi **não** conectar o servidor Windows à VPC (Rede Privada).
+* **Objetivo:** Garantir isolamento total (Network Segmentation). Caso o servidor Windows seja comprometido por um atacante real (o que é esperado, dado que exporemos RDP), o atacante não terá rota de rede lateral para alcançar meu servidor de logs (Ubuntu/Elasticsearch).
+
+![Specs Windows](images/13-windows-isolation-specs.png)
+*Provisionamento do Windows Server 2022 fora da VPC para quarentena de rede.*
+
+### 2. Acesso e Configuração Inicial
+O acesso inicial foi realizado via Console VNC (NoVNC) provido pela plataforma de nuvem para garantir que o sistema operacional completou o *boot* corretamente antes de expor serviços de rede.
+
+![Console Boot](images/14-windows-console-boot.png)
+*Boot inicial e login administrativo via Console Web.*
+
+### 3. Exposição Controlada (RDP)
+Habilitei o protocolo RDP (Remote Desktop Protocol - Porta 3389) para administração remota.
+* **Risco Aceito:** Manter o RDP exposto na internet é uma vulnerabilidade crítica comum. Neste laboratório, isso é intencional para gerar logs de *Brute Force* reais que serão capturados e analisados pelo SIEM nas próximas etapas.
+
+![Acesso RDP](images/15-windows-rdp-access.png)
+*Conexão remota bem-sucedida provando a acessibilidade pública do alvo.*
+
+---
