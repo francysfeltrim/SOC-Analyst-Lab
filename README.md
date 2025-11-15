@@ -103,6 +103,33 @@ Para conectar o Kibana ao Elasticsearch de forma segura, utilizei o mecanismo de
 ![Geração de Token](images/08-security-enrollment.png)
 *Geração do token de inscrição para pareamento seguro entre Kibana e Elasticsearch.*
 
+### 3. Acesso e Configuração de Criptografia (Keystore)
+Após o login inicial, obtive acesso à interface central do Elastic ("Welcome Home"), confirmando que a stack ELK estava operacional.
+
+![Elastic Home](images/10-elastic-home-welcome.png)
+*Acesso bem-sucedido à interface web do Elastic Stack.*
+
+**Troubleshooting: Erro de Permissões e Chaves de Criptografia**
+Ao navegar para a aba de **Security > Alerts**, deparei-me com um erro de sistema: *"Detection engine permissions required"*.
+Investigando a documentação, identifiquei que o erro não era de permissões de utilizador, mas sim a ausência de chaves de criptografia no *Keystore* do Kibana, necessárias para armazenar regras de alerta de forma segura.
+
+![Erro Encryption](images/97-troubleshooting-encryption-error.png)
+*Erro apresentado devido à falta de chaves de criptografia persistentes.*
+
+**Solução Aplicada:**
+1.  Gerei novas chaves de criptografia via CLI (`kibana-encryption-keys generate`).
+2.  Adicionei as chaves manualmente ao cofre seguro do Kibana (`kibana-keystore add`).
+3.  Reiniciei o serviço para aplicar as alterações.
+
+![Gerando Chaves](images/11-generating-encryption-keys.png)
+*Geração e inserção das chaves de segurança no Keystore.*
+
+**Resultado Final:**
+O painel de Alertas carregou com sucesso, pronto para receber deteções de segurança.
+
+![Alerts Corrigido](images/12-alerts-dashboard-fixed.png)
+*Painel de Security Alerts totalmente operacional após a correção.*
+
 ---
 
 ### ⚠️ Desafios e Soluções (Troubleshooting)
@@ -120,4 +147,4 @@ Ao tentar liberar o tráfego TCP, cometi um erro ao definir o range de portas in
 *Regra de firewall corrigida permitindo tráfego TCP na porta do Kibana.*
 
 ---
-**Próximos Passos:** Configuração dos Agentes e Ingestão de Logs.
+**Próximos Passos:** Provisionamento do Servidor Windows (Vítima).
