@@ -172,3 +172,65 @@ Habilitei o protocolo RDP (Remote Desktop Protocol - Porta 3389) para administra
 *Conexão remota bem-sucedida provando a acessibilidade pública do alvo.*
 
 ---
+## 📌 Fase 4: Ingestão de Dados e Fleet Server (Dia 6)
+
+Com a infraestrutura do SIEM (ELK) e da Vítima (Windows) prontas, a próxima etapa foi conectá-los. Para isso, utilizei a arquitetura **Elastic Fleet**, que centraliza o gerenciamento de todos os agentes de coleta.
+
+Esta fase exigiu a criação de uma terceira VM Linux (`MyDFIR-Fleet-Server`) para atuar como o "Gerente" dos agentes, seguindo as boas práticas de separação de funções.
+
+![Specs Fleet Server](images/16-fleet-server-deploy-specs.png)
+*Provisionamento da VM dedicada para o Fleet Server.*
+
+---
+
+### ⚠️ Desafios e Soluções (Troubleshooting Avançado)
+
+Esta foi a fase mais complexa do projeto até o momento, apresentando múltiplos pontos de falha que exigiram diagnóstico em diferentes camadas (Rede, Aplicação e Configuração).
+
+#### 1. Troubleshooting (Linux): Firewall e Conectividade
+Ao tentar instalar o Fleet Server (agente Linux), a instalação falhou com erros de `i/o timeout`.
+
+![Erro de Conexão](images/17-troubleshoot-linux-firewall-error.png)
+*Log de erro indicando que o Fleet Server não conseguia se comunicar com o Elasticsearch na porta 9200.*
+
+* **Diagnóstico:** O Firewall Group da Vultr, configurado para aceitar conexões apenas do "Meu IP", estava bloqueando a comunicação interna entre os servidores (Fleet não conseguia falar com ELK).
+* **Solução:** Alterei a regra de firewall para `Anywhere (0.0.0.0/0)` para o range `1-65535`, permitindo a comunicação interna necessária para o laboratório. Isso resolveu o bloqueio das portas **9200** (Elastic) e **8220** (Fleet).
+
+![Firewall Fix](images/18-vultr-firewall-fix.png)
+*Ajuste nas regras de firewall para permitir a comunicação interna do lab.*
+
+Após a correção do firewall, a instalação do Fleet Server no Linux foi concluída com sucesso.
+
+![Sucesso Linux](images/19-linux-agent-install-success.png)
+*Instalação do agente Fleet Server bem-sucedida.*
+
+#### 2. Troubleshooting (Windows): Instalação do Agente
+A implantação do agente no Windows Server apresentou três erros em sequência:
+1.  **Erro de PowerShell:** O comando copiado do Kibana era longo e quebrava linhas, fazendo o PowerShell executá-lo incorretamente.
+2.  **Erro de Caminho:** O PowerShell não encontrava o `elastic-agent.exe` pois eu não estava no diretório correto.
+3.  **Erro de Loop (`:443`):** O agente instalava, mas entrava em loop infinito de conexão.
+
+* **Solução (Comando Final):** Resolvi todos os problemas de uma vez construindo um comando de instalação manual e robusto.
+    1.  Naveguei para o diretório correto (`cd elastic-agent...`).
+    2.  Usei o IP e a porta **correta** (`:8220`).
+    3.  Adicionei a flag `--force` para sobrescrever a instalação anterior falha.
+
+![Sucesso Windows](images/20-windows-agent-install-success.png)
+*Comando final no PowerShell (com `cd` e `--force`) que resultou na instalação bem-sucedida.*
+
+#### 3. Troubleshooting (Kibana): O Loop "Updating"
+Após a instalação, o agente Windows ficou preso no status "Updating".
+* **Diagnóstico:** Ao inspecionar a mensagem de erro no Kibana, notei que o agente tentava se comunicar na porta `:443`, apesar de eu ter forçado a instalação na `:8220`. A **Política de Agente** (Agent Policy) no Kibana estava configurada com a URL errada, sobrescrevendo minha instalação manual.
+
+![Erro de Política](images/21-troubleshoot-kibana-policy-error.png)
+*Configuração do Fleet Server no Kibana apontando para a porta errada (443).*
+
+* **Solução Definitiva:** Editei as configurações do Fleet Server diretamente no Kibana, corrigindo a URL global para `https://[IP_DO_FLEET]:8220`. Após reiniciar o serviço no Windows (`Stop-Service/Start-Service`), o agente recebeu a política correta.
+
+### 4. Validação Final da Infraestrutura
+Com todas as correções aplicadas, ambos os agentes (Linux Fleet Server e Windows Vítima) reportaram status **Healthy** (Saudável), confirmando que a infraestrutura de coleta de logs está 100% operacional.
+
+![Dashboard Fleet](images/22-fleet-dashboard-all-healthy.png)
+*Visão final do painel Fleet com todos os agentes online e saudáveis.*
+
+---
