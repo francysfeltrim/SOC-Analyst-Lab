@@ -172,7 +172,7 @@ Habilitei o protocolo RDP (Remote Desktop Protocol - Porta 3389) para administra
 *Conexão remota bem-sucedida provando a acessibilidade pública do alvo.*
 
 ---
-## 📌 Fase 4: Ingestão de Dados e Fleet Server (Dia 6)
+## 📌 Fase 4: Ingestão de Dados e Fleet Server 
 
 Com a infraestrutura do SIEM (ELK) e da Vítima (Windows) prontas, a próxima etapa foi conectá-los. Para isso, utilizei a arquitetura **Elastic Fleet**, que centraliza o gerenciamento de todos os agentes de coleta.
 
@@ -232,5 +232,35 @@ Com todas as correções aplicadas, ambos os agentes (Linux Fleet Server e Windo
 
 ![Dashboard Fleet](images/22-fleet-dashboard-all-healthy.png)
 *Visão final do painel Fleet com todos os agentes online e saudáveis.*
+
+---
+## 📌 Fase 5: Enriquecimento de Logs com Sysmon 
+
+Com os agentes online, o próximo passo foi enriquecer a qualidade dos dados coletados. O Elastic Agent coleta os logs de segurança padrão do Windows, mas para uma detecção de ameaças eficaz (Threat Hunting), é necessária uma telemetria mais profunda.
+
+Para isso, instalei o **Sysmon (System Monitor)** da Microsoft, a ferramenta padrão da indústria para monitoramento avançado de *endpoints*.
+
+### 1. Instalação e Configuração
+A instalação foi realizada no servidor Windows Server (Vítima). O ponto crucial foi não instalar o Sysmon com as configurações padrão (que são muito "barulhentas").
+
+Utilizei uma configuração personalizada (`.xml`) baseada no projeto *SwiftOnSecurity*, que é um padrão de mercado. Este arquivo filtra eventos de sistema irrelevantes e foca no que é importante para a segurança, otimizando a ingestão de dados no SIEM.
+
+![Instalação Sysmon](images/23-sysmon-install-powershell.png)
+*Instalação do Sysmon via PowerShell (Admin), aplicando o arquivo de configuração .xml.*
+
+### 2. Validação Local
+Após a instalação, validei que o Sysmon estava operacional na própria máquina antes de tentar configurá-lo no SIEM.
+
+**1. Verificação do Serviço:**
+Confirmei que o serviço `Sysmon64` foi instalado e estava em execução (`Running`) no `services.msc`.
+
+![Serviço Sysmon](images/24-sysmon-service-running.png)
+*Serviço Sysmon64 ativo e rodando em segundo plano.*
+
+**2. Verificação dos Logs:**
+Confirmei no **Visualizador de Eventos (Event Viewer)** que os logs estavam sendo gerados. Isso prova que o Sysmon está monitorando ativamente o sistema.
+
+![Logs Sysmon Locais](images/25-sysmon-local-event-viewer.png)
+*Logs operacionais do Sysmon (ex: Event ID 3 - Network connection) sendo gerados localmente.*
 
 ---
