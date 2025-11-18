@@ -264,3 +264,35 @@ Confirmei no **Visualizador de Eventos (Event Viewer)** que os logs estavam send
 *Logs operacionais do Sysmon (ex: Event ID 3 - Network connection) sendo gerados localmente.*
 
 ---
+## 📌 Fase 6: Ingestão de Logs no SIEM 
+
+Com o Sysmon a gerar logs localmente, o passo final da infraestrutura foi configurar o *Elastic Agent* para ler esses arquivos e enviá-los para o Elasticsearch.
+
+### 1. Integração de Fontes de Dados (Data Ingestion)
+No Kibana, configurei a política do agente Windows para incluir duas novas integrações de **"Custom Windows Event Logs"**. Isso instrui o agente a ler canais específicos do Windows Event Viewer.
+
+**Canais Configurados:**
+* **Sysmon:** `Microsoft-Windows-Sysmon/Operational` (Foco em criação de processos e rede).
+* **Windows Defender:** `Microsoft-Windows-Windows Defender/Operational` (Foco em deteção de malware).
+
+![Config Sysmon](images/26-integration-sysmon-config.png)
+*Configuração do canal de ingestão para logs do Sysmon.*
+
+![Config Defender](images/27-integration-defender-config.png)
+*Configuração do canal de ingestão para logs do Windows Defender.*
+
+### 2. Validação de Recebimento (Data Discovery)
+Após aplicar a política, aguardei a propagação para o agente e validei o recebimento dos dados na aba **Discover** do Kibana.
+
+Realizei testes gerando atividade no servidor (como reiniciar serviços de segurança) para confirmar que os logs estavam a chegar quase em tempo real.
+
+**Resultado:**
+Os logs do Sysmon (ex: *Process Create*, Event ID 1) e do Defender começaram a ser indexados corretamente pelo SIEM.
+
+![Logs Sysmon](images/29-discover-sysmon-logs.png)
+*Prova de ingestão: Log detalhado do Sysmon visualizado no Kibana.*
+
+![Volume de Dados](images/30-discover-event-volume.png)
+*Gráfico de volume de eventos confirmando o fluxo contínuo de dados entre a Vítima e o SIEM.*
+
+---
