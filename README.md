@@ -319,3 +319,26 @@ Os logs mostram bots tentando adivinhar senhas para usuários comuns (`root`, `a
 *Live logs demonstrando tentativas massivas de Brute Force contra o servidor exposto.*
 
 ---
+## 📌 Fase 8: Ingestão de Logs Linux e Monitoramento SSH (Dia 13)
+
+Com o servidor Linux ("Honeypot") sob ataque constante, configurei o agente para coletar esses logs e enviá-los para o SIEM, permitindo análise centralizada.
+
+### 1. Configuração da Integração de Sistema
+Como o *Fleet Server* já possuía o Elastic Agent instalado, precisei apenas validar a política de agentes. Confirmei que a integração **System** estava ativa e configurada para ler os logs de autenticação do sistema operacional.
+
+* **Caminho do Log:** `/var/log/auth.log` (Padrão Ubuntu/Debian).
+* **Dataset:** `system.auth`.
+
+![Configuração Linux](images/33-linux-system-integration-config.png)
+*Configuração da política para coleta de logs de autenticação (auth.log).*
+
+### 2. Visualização de Ataques em Tempo Real
+No Kibana, utilizei a funcionalidade **Discover** para filtrar eventos do dataset `system.auth` com resultado de falha (`event.outcome: failure`).
+
+**Resultado:**
+Os ataques de força bruta que antes eram apenas linhas de texto no terminal agora são eventos estruturados no SIEM. O gráfico de volume mostra a persistência dos ataques ao longo do tempo.
+
+![Discover SSH](images/34-kibana-discover-ssh-failures.png)
+*Visualização no Kibana confirmando a ingestão contínua de falhas de login SSH vindas da internet.*
+
+---
