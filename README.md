@@ -296,3 +296,26 @@ Os logs do Sysmon (ex: *Process Create*, Event ID 1) e do Defender começaram a 
 *Gráfico de volume de eventos confirmando o fluxo contínuo de dados entre a Vítima e o SIEM.*
 
 ---
+## 📌 Fase 7: Criação de Honeypot SSH e Análise de Ataques (Dia 12)
+
+O objetivo desta fase era provisionar um servidor Linux exposto à internet para atuar como "isca" (Honeypot) e capturar tentativas reais de ataque SSH (Brute Force).
+
+### 1. Otimização de Recursos (Engenharia)
+Durante o provisionamento de uma quarta instância (Linux Target), atingi o limite de cota da conta de nuvem (Cloud Resource Quotas).
+
+![Decisão de Recurso](images/31-resource-optimization-decision.png)
+*Limite de instâncias atingido durante a tentativa de scale-out.*
+
+* **Solução Arquitetural:** Em vez de solicitar aumento de cota (o que geraria custos), optei por reutilizar o servidor `MyDFIR-Fleet-Server`. Como ele já é um servidor Linux Ubuntu exposto à internet (necessário para os agentes remotos), ele serve perfeitamente como alvo duplo: **Gerenciador de Agentes** e **Honeypot SSH**.
+
+### 2. Análise de Logs de Autenticação (`auth.log`)
+Acessando o servidor via SSH, analisei os logs de autenticação localizados em `/var/log/auth.log`.
+Em pouco mais de 24 horas de exposição à internet, o servidor registrou centenas de tentativas de acesso não autorizado vindas de múltiplos endereços IP globais.
+
+**Evidências de Ataque:**
+Os logs mostram bots tentando adivinhar senhas para usuários comuns (`root`, `admin`) e serviços específicos (`git`, `composer`, `squid`).
+
+![Logs de Ataque](images/32-ssh-bruteforce-evidence.png)
+*Live logs demonstrando tentativas massivas de Brute Force contra o servidor exposto.*
+
+---
