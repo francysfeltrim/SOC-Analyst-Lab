@@ -296,7 +296,7 @@ Os logs do Sysmon (ex: *Process Create*, Event ID 1) e do Defender começaram a 
 *Gráfico de volume de eventos confirmando o fluxo contínuo de dados entre a Vítima e o SIEM.*
 
 ---
-## 📌 Fase 7: Criação de Honeypot SSH e Análise de Ataques (Dia 12)
+## 📌 Fase 7: Criação de Honeypot SSH e Análise de Ataques 
 
 O objetivo desta fase era provisionar um servidor Linux exposto à internet para atuar como "isca" (Honeypot) e capturar tentativas reais de ataque SSH (Brute Force).
 
@@ -319,7 +319,7 @@ Os logs mostram bots tentando adivinhar senhas para usuários comuns (`root`, `a
 *Live logs demonstrando tentativas massivas de Brute Force contra o servidor exposto.*
 
 ---
-## 📌 Fase 8: Ingestão de Logs Linux e Monitoramento SSH (Dia 13)
+## 📌 Fase 8: Ingestão de Logs Linux e Monitoramento SSH 
 
 Com o servidor Linux ("Honeypot") sob ataque constante, configurei o agente para coletar esses logs e enviá-los para o SIEM, permitindo análise centralizada.
 
@@ -340,5 +340,30 @@ Os ataques de força bruta que antes eram apenas linhas de texto no terminal ago
 
 ![Discover SSH](images/34-kibana-discover-ssh-failures.png)
 *Visualização no Kibana confirmando a ingestão contínua de falhas de login SSH vindas da internet.*
+
+---
+## 📌 Fase 9: Criação de Alertas e Dashboards 
+
+Com os dados de ataque fluindo para o SIEM, o objetivo final era transformar logs brutos em inteligência acionável. Criei mecanismos de detecção automática e visualização geográfica.
+
+### 1. Regra de Detecção (Alerting)
+Criei uma regra de alerta para detectar padrões de força bruta (Brute Force).
+* **Lógica:** Se um único host gerar mais de **5 falhas de autenticação SSH** (`system.auth.ssh.event: Failed`) em um intervalo de **5 minutos**, um alerta de severidade média é disparado.
+
+![Regra de Alerta](images/37-alert-rule-threshold-config.png)
+*Configuração da regra de threshold para detecção de força bruta SSH.*
+
+### 2. Construção de Dashboards (Threat Intelligence)
+Para visualizar a origem dos ataques, utilizei o **Elastic Maps**.
+Configurei uma camada (*Layer*) baseada no campo `source.geo.country_iso_code`, que traduz o IP do atacante em sua localização geográfica.
+
+![Config Mapa](images/38-map-layer-iso-code.png)
+*Mapeamento de IPs para geolocalização usando códigos ISO de países.*
+
+### 3. Resultado Final: O Mapa de Ameaças
+O Dashboard final apresenta uma visão em tempo real da cibersegurança do servidor. Em poucas horas de monitoramento, foi possível identificar ataques distribuídos vindos da Europa e Ásia (França, Indonésia, Itália), confirmando a natureza global das ameaças automatizadas.
+
+![Mapa de Ataques](images/39-final-dashboard-threat-map.png)
+*Dashboard de Threat Hunting visualizando a origem global dos ataques SSH.*
 
 ---
