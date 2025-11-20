@@ -367,3 +367,39 @@ O Dashboard final apresenta uma visão em tempo real da cibersegurança do servi
 *Dashboard de Threat Hunting visualizando a origem global dos ataques SSH.*
 
 ---
+## 📌 Fase 10: Engenharia de Detecção e SIEM 
+
+Com a ingestão de dados validada, avancei para a criação de regras de detecção (Detection Engineering) utilizando o módulo **Elastic Security**. Diferente dos alertas simples, estas regras utilizam lógica de correlação e *thresholds* (limiares) para identificar comportamentos anômalos.
+
+### 1. Análise de Padrões de Ataque RDP
+Antes de criar a regra, analisei os logs brutos do Windows no Discover. Identifiquei que falhas de login geram o **Event ID 4625** (*An account failed to log on*). Este ID é a base para detectar tentativas de acesso não autorizado.
+
+![Logs RDP 4625](images/40-discover-rdp-failure-logs.png)
+*Identificação de logs de falha de autenticação Windows (Event ID 4625) para basear a regra de detecção.*
+
+### 2. Criação de Regras de Detecção (Threshold Rules)
+Criei duas regras distintas no SIEM, uma para cada sistema operacional, garantindo precisão e evitando falsos positivos.
+
+**Regra 1: SSH Brute Force (Linux)**
+* **Alvo:** `MyDFIR-Fleet-Server`
+* **Query:** `system.auth.ssh.event: *` (Eventos de autenticação SSH).
+* **Lógica:** Dispara se houver **5 ou mais** tentativas de falha vindas do mesmo IP para o mesmo usuário em 5 minutos.
+
+![Lógica SSH](images/41-security-rule-ssh-logic.png)
+*Configuração da regra de threshold para Linux, agrupando eventos por IP de origem e usuário.*
+
+**Regra 2: RDP Brute Force (Windows)**
+* **Alvo:** `Win-Server-Lab`
+* **Query:** `event.code: 4625` (Logon Failure).
+* **Lógica:** Similar à do Linux, detecta volume alto de erros de senha via RDP.
+
+![Lógica RDP](images/42-security-rule-rdp-logic.png)
+*Configuração da regra de threshold para Windows, focada no Event ID 4625.*
+
+### 3. Status do Monitoramento
+As regras foram ativadas e estão monitorando em tempo real. Qualquer atividade que ultrapasse os limiares definidos gerará automaticamente um "Alerta de Segurança" no painel do analista.
+
+![Regras Ativas](images/43-active-detection-rules-list.png)
+*Painel de Detection Rules com as regras de Linux e Windows implementadas e ativas.*
+
+---
