@@ -431,6 +431,9 @@ Consolidei todas as visualizações em um único Dashboard Operacional.
 Esta visão permite correlacionar se uma onda de ataques está atingindo apenas um sistema específico ou se é uma campanha varrendo toda a infraestrutura.
 
 ![Dashboard Final](images/46-unified-threat-dashboard.png)
-*Dashboard de Segurança completo, monitorando em tempo real as tentativas de intrusão em ambientes Windows e Linux.*
+*Dashboard de Segurança completo, monitorando em tempo real as tentativas de intrusão.*
+
+![Dashboard Completo](images/47-unified-threat-dashboard2.png)
+*Visão expandida do Dashboard, detalhando as tabelas de usuários e IPs de origem mais ativos nos ataques.*
 
 ---
