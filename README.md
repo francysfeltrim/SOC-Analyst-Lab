@@ -403,3 +403,34 @@ As regras foram ativadas e estão monitorando em tempo real. Qualquer atividade 
 *Painel de Detection Rules com as regras de Linux e Windows implementadas e ativas.*
 
 ---
+## 📌 Fase 11: Visualização de Ameaças RDP e Dashboard Unificado 
+
+Para complementar a visibilidade, expandi o Dashboard para incluir as tentativas de ataque ao servidor Windows (RDP). O objetivo final foi criar um "Painel de Controle" (Single Pane of Glass) que unificasse a visão de ameaças de toda a infraestrutura.
+
+### 1. Mapeamento de Ataques Windows
+Configurei um novo mapa no Kibana filtrando especificamente pelo **Event ID 4625** (Falha de Login RDP). Isso permite visualizar geograficamente de onde vêm as tentativas de invasão ao servidor Windows, separando-as visualmente dos ataques SSH.
+
+![Mapa RDP](images/44-rdp-map-layer-config.png)
+*Camada de mapa configurada para plotar tentativas de acesso RDP por geolocalização.*
+
+### 2. Análise Tabular (Top Offenders)
+Além do mapa, criei visualizações em tabela para identificar os principais ofensores.
+As tabelas agregam dados por:
+* **User Name:** Quais usuários estão sendo mais testados (ex: `Administrator`, `root`, `admin`).
+* **Source IP:** Quais endereços IP estão gerando mais volume de ataque.
+* **País de Origem:** Visão consolidada por nação.
+
+![Tabela de Atacantes](images/45-attacker-table-visualization.png)
+*Tabela dinâmica classificando os top 10 IPs e usuários utilizados nas tentativas de força bruta.*
+
+### 3. Dashboard Unificado de Ameaças
+Consolidei todas as visualizações em um único Dashboard Operacional.
+* **Painel Esquerdo (Linux):** Mapa e Tabela de ataques SSH.
+* **Painel Direito (Windows):** Mapa e Tabela de ataques RDP.
+
+Esta visão permite correlacionar se uma onda de ataques está atingindo apenas um sistema específico ou se é uma campanha varrendo toda a infraestrutura.
+
+![Dashboard Final](images/46-unified-threat-dashboard.png)
+*Dashboard de Segurança completo, monitorando em tempo real as tentativas de intrusão em ambientes Windows e Linux.*
+
+---
