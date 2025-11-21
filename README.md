@@ -424,16 +424,17 @@ As tabelas agregam dados por:
 *Tabela dinâmica classificando os top 10 IPs e usuários utilizados nas tentativas de força bruta.*
 
 ### 3. Dashboard Unificado de Ameaças
-Consolidei todas as visualizações em um único Dashboard Operacional.
-* **Painel Esquerdo (Linux):** Mapa e Tabela de ataques SSH.
-* **Painel Direito (Windows):** Mapa e Tabela de ataques RDP.
+Consolidei todas as visualizações em um único Dashboard Operacional, totalizando 8 painéis de visualização divididos por sistema operacional:
 
-Esta visão permite correlacionar se uma onda de ataques está atingindo apenas um sistema específico ou se é uma campanha varrendo toda a infraestrutura.
+* **Seção Superior (Linux/SSH):** Mapas de geolocalização e tabelas de origem de ataques ao Fleet Server.
+* **Seção Inferior (Windows/RDP):** Mapas e tabelas focados nas tentativas de intrusão ao servidor Windows.
+
+Esta organização permite uma leitura vertical rápida e correlacionada de toda a superfície de ataque.
 
 ![Dashboard Final](images/46-unified-threat-dashboard.png)
-*Dashboard de Segurança completo, monitorando em tempo real as tentativas de intrusão.*
+*Visão geral do Dashboard de Segurança no Kibana.*
 
-![Dashboard Completo](images/47-unified-threat-dashboard2.png)
-*Visão expandida do Dashboard, detalhando as tabelas de usuários e IPs de origem mais ativos nos ataques.*
+![Dashboard Completo Expandido](images/47-unified-threat-dashboard2.png)
+*Visão detalhada (Full Page) incluindo as tabelas de "Top Offenders" para ambos os protocolos.*
 
 ---
