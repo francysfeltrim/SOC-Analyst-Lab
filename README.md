@@ -438,3 +438,26 @@ Esta organização permite uma leitura vertical rápida e correlacionada de toda
 *Visão detalhada (Full Page) incluindo as tabelas de "Top Offenders" para ambos os protocolos.*
 
 ---
+## 📌 Fase 12: Planejamento de Ataque e C2 
+
+Antes de executar a simulação de adversário, desenhei o fluxo de ataque (Kill Chain) para garantir que todos os estágios gerem telemetria detectável pelo SIEM. O plano segue a estrutura do framework MITRE ATT&CK.
+
+**O Plano de Ataque:**
+
+**Parte 1: Acesso e Reconhecimento**
+1.  **Initial Access:** Força bruta via RDP para ganhar acesso ao servidor.
+2.  **Discovery:** Execução de comandos de descoberta (`whoami`, `ipconfig`, `net user`) para mapear o ambiente.
+3.  **Defense Evasion:** Desabilitação manual do Windows Defender para permitir a execução do malware.
+
+![Diagrama Parte 1](images/48-attack-diagram-part1.png)
+*Fases iniciais do ataque planejado: Acesso, Descoberta e Evasão.*
+
+**Parte 2: Comando e Controle**
+4.  **Execution:** Download e execução do agente malicioso via PowerShell.
+5.  **Command & Control (C2):** Estabelecimento de comunicação persistente com o servidor Mythic C2.
+6.  **Exfiltration:** Simulação de roubo de dados (arquivo `passwords.txt`).
+
+![Diagrama Parte 2](images/49-attack-diagram-part2.png)
+*Fases finais do ataque: Execução de C2 e Exfiltração de dados.*
+
+---
