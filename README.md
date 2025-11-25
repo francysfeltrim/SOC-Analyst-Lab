@@ -461,3 +461,35 @@ Antes de executar a simulação de adversário, desenhei o fluxo de ataque (Kill
 *Fases finais do ataque: Execução de C2 e Exfiltração de dados.*
 
 ---
+## 📌 Fase 13: Infraestrutura de Comando e Controle (C2) 
+
+Para executar o ataque planejado, precisei de uma infraestrutura de **C2 (Command & Control)**. A ferramenta escolhida foi o **Mythic**, um framework C2 moderno, multi-usuário e baseado em Docker, amplamente utilizado em operações de Red Team.
+
+### 1. Instalação do Servidor C2
+Devido às restrições de cota na nuvem, realizei a instalação do Mythic no servidor `MyDFIR-Fleet-Server`, aproveitando os recursos disponíveis (4GB RAM) para rodar os containers Docker necessários.
+
+* **Deploy:** Instalação de dependências (Docker Compose) e compilação dos serviços via `make`.
+* **Rede:** Configuração de regra de Firewall para expor a porta administrativa `7443`.
+
+![Docker Setup](images/50-mythic-prerequisites-docker.png)
+*Preparação do ambiente e instalação do Docker Compose.*
+
+![Build Mythic](images/51-mythic-build-process.png)
+*Compilação dos containers do framework Mythic.*
+
+### 2. Configuração e Acesso
+Após o build, recuperei as credenciais de administração geradas no arquivo de ambiente (`.env`) e validei o acesso ao painel de operações.
+
+![Credenciais](images/53-mythic-credentials-env.png)
+*Recuperação segura das credenciais de acesso administrativo.*
+
+![Dashboard C2](images/54-mythic-c2-dashboard-active.png)
+*Painel de Operações do Mythic C2 online e pronto para gerenciar agentes.*
+
+### 3. Máquina de Ataque (Kali Linux)
+Paralelamente, configurei uma máquina virtual local com **Kali Linux** utilizando VirtualBox. Esta máquina servirá como o ponto de lançamento dos ataques manuais e geração de payloads, conectando-se ao C2 na nuvem.
+
+![Setup Kali](images/55-kali-linux-local-setup.png)
+*Virtualização local do Kali Linux para operações ofensivas.*
+
+---
