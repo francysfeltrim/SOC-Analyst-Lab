@@ -493,3 +493,57 @@ Paralelamente, configurei uma máquina virtual local com **Kali Linux** utilizan
 *Virtualização local do Kali Linux para operações ofensivas.*
 
 ---
+## 📌 Fase 14: Execução de Ataque - Weaponization e Initial Access 
+
+Nesta fase crítica, executei o ciclo completo de ataque (Kill Chain), desde a preparação do artefato malicioso até o acesso inicial via força bruta.
+
+### 1. Weaponization (Criação do Payload)
+Utilizei o servidor Mythic C2 para gerar um agente malicioso (**Apollo**) configurado para sistemas Windows.
+* **Perfil:** HTTP (comunicação via porta 80/443 simulada).
+* **Formato:** Executável Windows (`svchost.exe`) para evadir detecção simples por nome.
+
+![Instalação Apollo](images/56-mythic-apollo-agent-install.png)
+*Instalação do agente Apollo no servidor C2.*
+
+![Configuração Payload](images/57-payload-configuration-ui.png)
+*Configuração do payload HTTP para comunicação persistente com o C2.*
+
+### 2. Initial Access (Ataque de Força Bruta)
+Para entregar o payload, precisei primeiro ganhar acesso ao servidor. Utilizei o **Kali Linux** para executar um ataque de dicionário contra o serviço RDP.
+
+**Ferramentas:** `Hydra` e `xFreeRDP`.
+**Técnica:** T1110 (Brute Force).
+
+Após ajustar as configurações de NLA (Network Level Authentication) no alvo para permitir conexões legadas, o Hydra recuperou com sucesso a senha de Administrador.
+
+![Hydra Sucesso](images/60-hydra-rdp-success.png)
+*Execução bem-sucedida do Hydra recuperando credenciais de acesso.*
+
+![Acesso Confirmado](images/61-xfreerdp-access-confirmed.png)
+*Acesso RDP obtido via Kali Linux utilizando as credenciais comprometidas.*
+
+### 3. Command & Control (Callback)
+Com acesso ao servidor, transferi e executei o payload. O agente Apollo estabeleceu conexão imediata com o servidor Mythic, concedendo controle remoto total sobre a vítima.
+
+![Callback C2](images/58-mythic-c2-successful-callback.png)
+*Sessão ativa no Mythic C2, confirmando o comprometimento total do servidor Windows.*
+
+### ⚠️ Desafios e Soluções (Troubleshooting Ofensivo)
+
+Durante a execução do ataque, enfrentei mecanismos de defesa nativos do Windows e problemas de conectividade que exigiram adaptação das táticas.
+
+#### 1. Bloqueio de Conexão RDP (NLA)
+Ao tentar executar o Hydra, recebi erros de `[ERROR] freerdp: The connection failed to establish`, mesmo com o servidor online.
+* **Diagnóstico:** O alvo estava configurado com **NLA (Network Level Authentication)** ativo, que rejeita conexões de ferramentas de força bruta legadas antes mesmo da tentativa de senha.
+* **Solução:** Desativei o NLA no servidor alvo via GUI e garanti a alteração via registro do Windows para permitir a negociação de credenciais pelo Hydra.
+
+#### 2. Falhas no Brute Force (Rate Limiting)
+Mesmo com a senha correta na wordlist, o Hydra falhava em identificar o sucesso ou perdia a conexão.
+* **Diagnóstico:** O envio padrão de múltiplas threads paralelas sobrecarregava o serviço RDP, causando negação de serviço temporária ou bloqueio.
+* **Solução:** Ajustei os parâmetros do ataque para ser mais lento e sequencial (`-t 1` para uma task por vez e `-W 3` para espera entre tentativas), garantindo estabilidade na conexão.
+
+#### 3. Execução do Payload (Caminhos e Sintaxe)
+Tive dificuldades ao executar o payload via PowerShell devido a erros de *Path* e sintaxe de comandos de download (`Invoke-WebRequest`).
+* **Solução:** Optei pelo download direto via navegador para garantir a integridade do arquivo e executei o artefato malicioso (`svchost.exe`) navegando manualmente até o diretório de usuário, contornando erros de caminho relativo.
+---
+
