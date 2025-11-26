@@ -546,4 +546,15 @@ Mesmo com a senha correta na wordlist, o Hydra falhava em identificar o sucesso 
 Tive dificuldades ao executar o payload via PowerShell devido a erros de *Path* e sintaxe de comandos de download (`Invoke-WebRequest`).
 * **Solução:** Optei pelo download direto via navegador para garantir a integridade do arquivo e executei o artefato malicioso (`svchost.exe`) navegando manualmente até o diretório de usuário, contornando erros de caminho relativo.
 ---
+## 🚨 Incidente Real: Cloud Abuse Report & Remediação
 
+Durante a execução da simulação de C2 (Mythic), a infraestrutura do laboratório foi detectada por scanners de Threat Intelligence externos (Spamhaus), gerando um reporte de abuso real junto ao provedor de nuvem (Vultr).
+
+**O Evento:**
+* **Detecção:** Atividade de "Botnet C2" na porta 7443/80.
+* **Causa Raiz:** Falha de OPSEC (Operational Security). As regras de firewall foram configuradas como `Anywhere (0.0.0.0/0)` para facilitar a conectividade do laboratório, expondo a assinatura do C2 à internet pública.
+
+**Ação de Resposta (Containment & Eradication):**
+1.  **Isolamento:** O servidor comprometido/ofensor (`MyDFIR-Fleet-Server`) foi imediatamente destruído para cessar a exposição.
+2.  **Comunicação:** Resposta formal ao time de Trust & Safety do provedor, detalhando o contexto educacional e as medidas de correção tomadas.
+3.  **Lições Aprendidas:** Em implementações futuras de C2, o acesso deve ser estritamente restrito via *Allowlisting* de IPs (apenas meu IP residencial) ou via VPN, nunca exposto publicamente.
