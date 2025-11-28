@@ -558,3 +558,45 @@ Durante a execução da simulação de C2 (Mythic), a infraestrutura do laborat�
 1.  **Isolamento:** O servidor comprometido/ofensor (`MyDFIR-Fleet-Server`) foi imediatamente destruído para cessar a exposição.
 2.  **Comunicação:** Resposta formal ao time de Trust & Safety do provedor, detalhando o contexto educacional e as medidas de correção tomadas.
 3.  **Lições Aprendidas:** Em implementações futuras de C2, o acesso deve ser estritamente restrito via *Allowlisting* de IPs (apenas meu IP residencial) ou via VPN, nunca exposto publicamente.
+---
+## 📌 Fase 15: Implementação de Sistema de Ticketing 
+
+Após o incidente de segurança simulado (e o real com a nuvem), ficou clara a necessidade de uma plataforma para gerenciar, triar e documentar os incidentes de forma organizada.
+
+Para isso, implementei o **osTicket**, um sistema de Help Desk open-source amplamente utilizado para gestão de chamados em TI e Segurança.
+
+### 1. Provisionamento e Hardening
+Criei um novo servidor Windows Server 2022 para hospedar a aplicação web (PHP/MySQL).
+Aplicando as lições de OPSEC aprendidas anteriormente, implementei uma política de firewall restritiva desde o início:
+* **Porta 80 (HTTP):** Acesso permitido *apenas* para meu endereço IP de gerenciamento.
+* **Porta 3389 (RDP):** Acesso restrito ao meu IP.
+
+![Firewall Seguro](images/62-osticket-firewall-hardening.png)
+*Regras de firewall configuradas com Allowlisting estrito para prevenir exposição pública indesejada.*
+
+### 2. Instalação da Stack Web (WAMP)
+Configurei o ambiente de servidor web utilizando o pacote XAMPP (Apache, MySQL, PHP) e realizei o deploy da aplicação osTicket, criando o banco de dados e definindo as credenciais administrativas.
+
+### 3. Validação do Sistema
+O sistema está operacional e pronto para receber integrações via API. A partir de agora, os alertas gerados no ELK (como o Brute Force RDP) poderão ser transformados automaticamente em tickets para investigação formal.
+
+![Painel osTicket](images/63-osticket-dashboard-success.png)
+*Painel administrativo do osTicket funcional e pronto para operação.*
+
+### ⚠️ Desafios e Soluções (Troubleshooting de Infraestrutura)
+
+Durante o deploy do servidor de gestão, enfrentei desafios relacionados com performance e segurança de rede.
+
+#### 1. Gargalo de Recursos (Resource Contention)
+Ao instalar a stack WAMP (XAMPP) no Windows Server, o sistema tornou-se não responsivo, travando a sessão RDP e o cursor do rato.
+* **Diagnóstico:** A instância selecionada (1 vCPU / 2GB RAM) atingiu 100% de uso de CPU ao tentar processar a descompactação do instalador simultaneamente com o scan em tempo real do Windows Defender.
+* **Solução:** Apliquei técnicas de gestão de sessão (reconexão RDP para limpar o buffer de vídeo) e aguardei a finalização dos processos de I/O intensivos, evitando reinícios forçados que poderiam corromper a instalação do banco de dados.
+
+#### 2. Correção de Vulnerabilidade de Firewall
+Identifiquei que o Firewall Group herdado dos laboratórios anteriores possuía uma regra residual de "Allow All" (`0.0.0.0/0` em todas as portas TCP), o que gerou o incidente de abuso anterior.
+* **Solução (Hardening):** Realizei uma auditoria nas regras e removi as permissões genéricas. Configurei o acesso às portas administrativas (3389 e 80) estritamente para o meu endereço IP (`My IP/32`), garantindo que o painel de gestão do osTicket não fique exposto a scanners públicos.
+
+#### 3. Prevenção de Falhas (Backup de Configuração)
+Antes de alterar os arquivos críticos de conexão com o banco de dados (`config.inc.php`), realizei backups manuais dos arquivos originais.
+* **Impacto:** Isso garantiu que, caso a alteração de *binding* de IP quebrasse o acesso ao PHPMyAdmin (o que é comum ao expor serviços web), a restauração seria imediata, seguindo boas práticas de Gestão de Mudança e continuidade de serviço.
+---
