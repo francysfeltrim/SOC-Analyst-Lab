@@ -596,7 +596,8 @@ Ao instalar a stack WAMP (XAMPP) no Windows Server, o sistema tornou-se não res
 Identifiquei que o Firewall Group herdado dos laboratórios anteriores possuía uma regra residual de "Allow All" (`0.0.0.0/0` em todas as portas TCP), o que gerou o incidente de abuso anterior.
 * **Solução (Hardening):** Realizei uma auditoria nas regras e removi as permissões genéricas. Configurei o acesso às portas administrativas (3389 e 80) estritamente para o meu endereço IP (`My IP/32`), garantindo que o painel de gestão do osTicket não fique exposto a scanners públicos.
 
-#### 3. Prevenção de Falhas (Backup de Configuração)
-Antes de alterar os arquivos críticos de conexão com o banco de dados (`config.inc.php`), realizei backups manuais dos arquivos originais.
-* **Impacto:** Isso garantiu que, caso a alteração de *binding* de IP quebrasse o acesso ao PHPMyAdmin (o que é comum ao expor serviços web), a restauração seria imediata, seguindo boas práticas de Gestão de Mudança e continuidade de serviço.
+#### 3. Erro de Permissão MySQL e Reversão de Configuração
+Ao alterar o *host* do banco de dados para o IP Público no arquivo `config.inc.php`, perdi o acesso ao PHPMyAdmin com o erro *"Host is not allowed to connect"*.
+* **Diagnóstico:** O usuário `root` do banco de dados estava configurado para aceitar conexões apenas de `localhost`. Ao mudar a configuração do arquivo antes de alterar as permissões do usuário, quebrei a conectividade.
+* **Solução:** Reverti a configuração para o padrão (usando o backup ou edição manual), acessei o painel localmente, concedi permissões explícitas para o meu IP Público nos usuários do banco e, somente então, reapliquei a configuração de rede externa..
 ---
