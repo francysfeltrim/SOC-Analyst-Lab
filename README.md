@@ -601,3 +601,49 @@ Ao alterar o *host* do banco de dados para o IP Público no arquivo `config.inc.
 * **Diagnóstico:** O usuário `root` do banco de dados estava configurado para aceitar conexões apenas de `localhost`. Ao mudar a configuração do arquivo antes de alterar as permissões do usuário, quebrei a conectividade.
 * **Solução:** Reverti a configuração para o padrão (usando o backup ou edição manual), acessei o painel localmente, concedi permissões explícitas para o meu IP Público nos usuários do banco e, somente então, reapliquei a configuração de rede externa..
 ---
+## 📌 Fase 16: Automação de Resposta a Incidentes - SOAR 
+
+Com o sistema de gestão operacional (osTicket) no ar, o objetivo final foi criar uma automação **SOAR (Security Orchestration, Automation, and Response)**. Configurei o ELK Stack para se comunicar automaticamente com o osTicket via API, fechando o ciclo de detecção e resposta.
+
+### 1. Configuração da API e Conector
+* **No osTicket:** Criei uma API Key vinculada estritamente ao IP do servidor ELK (`155.138...`), autorizando apenas este servidor a abrir chamados.
+* **No Kibana:** Configurei um conector do tipo **Webhook**. Como o osTicket exige autenticação via cabeçalho, utilizei a funcionalidade de *Custom HTTP Headers* para injetar a chave `X-API-Key` nas requisições.
+
+![API Key](images/64-osticket-api-key-config.png)
+*Configuração de segurança da API Key, limitando o acesso ao IP de origem do SIEM.*
+
+![Webhook Config](images/65-kibana-connector-webhook.png)
+*Configuração do conector Webhook utilizando autenticação via Custom Header.*
+
+### 2. Definição do Payload
+Configurei o corpo da requisição (Payload) em formato XML, mapeando os campos do alerta do Elastic para os campos do ticket (Assunto, Mensagem, Prioridade).
+
+![Payload XML](images/66-connector-payload-xml.png)
+*Estrutura XML definida para a criação automática do ticket.*
+
+### 3. Validação da Automação
+Realizei testes de conectividade enviando dados simulados.
+* **Resultado:** O conector obteve resposta `201 Created`, e o ticket apareceu instantaneamente no painel de suporte, validando a integração end-to-end.
+
+![Ticket Criado](images/67-automated-ticket-created.png)
+*Ticket gerado automaticamente no osTicket via gatilho do SIEM.*
+
+---
+
+### ⚠️ Desafios e Soluções (Troubleshooting Crítico de Integração)
+
+Esta fase apresentou erros críticos que exigiram reconstrução de infraestrutura e recuperação de banco de dados.
+
+#### 1. Corrupção de Banco de Dados (MySQL InnoDB)
+Após um reinício forçado do servidor (devido a travamento por falta de recursos), o serviço MySQL falhou ao iniciar. Logs indicaram corrupção nos arquivos de transação (`ib_logfile`).
+* **Diagnóstico:** O desligamento abrupto corrompeu a integridade do InnoDB, impedindo o *startup* do banco e o login na aplicação (`Authentication Required`).
+* **Solução:** Tentei a recuperação via limpeza de logs temporários, mas a corrupção era estrutural. Optei por realizar uma **reinstalação limpa (Clean Re-install)** da stack XAMPP e recriação do banco de dados `osticket_db`, restaurando o serviço em menos tempo do que uma recuperação forense de banco exigiria.
+
+#### 2. Conflito de Instalação (Diretório Sujo)
+Durante a reinstalação, o instalador falhou devido a resíduos da instalação anterior.
+* **Solução:** Realizei a limpeza manual do diretório `C:\xampp` e forcei a remoção de processos travados para garantir um *deploy* limpo.
+
+#### 3. Erro de Autenticação API (403/401)
+Inicialmente, os testes de conexão falhavam.
+* **Diagnóstico:** Identifiquei que o conector do Elastic não enviava a API Key no formato esperado pela autenticação básica.
+* **Solução:** Configurei manualmente o *Header* HTTP `X-API-Key` no conector do Kibana, garantindo que a credencial fosse passada corretamente para o gateway do osTicket.
