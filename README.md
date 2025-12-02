@@ -647,3 +647,31 @@ Durante a reinstalação, o instalador falhou devido a resíduos da instalação
 Inicialmente, os testes de conexão falhavam.
 * **Diagnóstico:** Identifiquei que o conector do Elastic não enviava a API Key no formato esperado pela autenticação básica.
 * **Solução:** Configurei manualmente o *Header* HTTP `X-API-Key` no conector do Kibana, garantindo que a credencial fosse passada corretamente para o gateway do osTicket.
+
+---
+## 📌 Fase 17: Investigação de Incidentes e Threat Intelligence 
+
+Com os alertas ativos, o ciclo de resposta a incidentes começou. Ao receber um alerta de **SSH Brute Force**, executei o playbook de investigação padrão.
+
+### 1. Triagem e Análise
+No painel de alertas do Elastic Security, analisei os detalhes do evento.
+* **Atividade Suspeita:** Múltiplas falhas de login em curto período.
+* **Origem:** IP `77.83.207.205`.
+* **Alvo:** Usuário `Administrator`.
+
+![Detalhes Alerta](images/68-alert-details-investigation.png)
+*Visão detalhada do alerta, identificando o IP de origem e o padrão de ataque.*
+
+### 2. Enriquecimento (Threat Intel)
+Para confirmar a malícia, consultei a reputação do IP em fontes de inteligência externas (**OSINT**).
+Utilizei o **AbuseIPDB**, que confirmou com **100% de confiança** que o IP pertence a uma botnet conhecida, validando o alerta como um **True Positive**.
+
+![AbuseIPDB](images/70-threat-intel-abuseipdb.png)
+*Validação externa do IP atacante, confirmando reputação maliciosa.*
+
+### 3. Resposta Automatizada
+Para garantir que esse tipo de incidente seja tratado formalmente, configurei a regra de detecção para acionar automaticamente o conector do **osTicket**.
+Agora, sempre que este alerta disparar, um ticket contendo os detalhes da investigação (Link do Alerta, IP, Usuário) será criado para a equipe de SOC.
+
+---
+
