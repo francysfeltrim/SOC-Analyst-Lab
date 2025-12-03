@@ -649,29 +649,34 @@ Inicialmente, os testes de conexão falhavam.
 * **Solução:** Configurei manualmente o *Header* HTTP `X-API-Key` no conector do Kibana, garantindo que a credencial fosse passada corretamente para o gateway do osTicket.
 
 ---
-## 📌 Fase 17: Investigação de Incidentes e Threat Intelligence 
 
-Com os alertas ativos, o ciclo de resposta a incidentes começou. Ao receber um alerta de **SSH Brute Force**, executei o playbook de investigação padrão.
+## 📌 Fase 17: Investigação de Incidente e Threat Hunting 
 
-### 1. Triagem e Análise
-No painel de alertas do Elastic Security, analisei os detalhes do evento.
-* **Atividade Suspeita:** Múltiplas falhas de login em curto período.
-* **Origem:** IP `77.83.207.205`.
-* **Alvo:** Usuário `Administrator`.
+Ao receber o alerta de **SSH Brute Force**, iniciei o processo manual de investigação para determinar a extensão e o impacto do ataque. Segui o *playbook* de resposta a incidentes para responder a quatro perguntas críticas:
 
-![Detalhes Alerta](images/68-alert-details-investigation.png)
-*Visão detalhada do alerta, identificando o IP de origem e o padrão de ataque.*
+### 1. Investigação do Atacante (Threat Intelligence)
+**P:** Este IP é conhecido por atividades maliciosas?
+**R:** Sim.
+* **Evidência:** Consultei o IP `77.83.207.205` no **AbuseIPDB**. O endereço possui "Confidence of Abuse: 100%", sendo reportado centenas de vezes por ataques de força bruta globalmente.
 
-### 2. Enriquecimento (Threat Intel)
-Para confirmar a malícia, consultei a reputação do IP em fontes de inteligência externas (**OSINT**).
-Utilizei o **AbuseIPDB**, que confirmou com **100% de confiança** que o IP pertence a uma botnet conhecida, validando o alerta como um **True Positive**.
+![Intel Externa](images/70-threat-intel-abuseipdb.png)
+*Consulta de reputação confirmando a origem maliciosa do IP.*
 
-![AbuseIPDB](images/70-threat-intel-abuseipdb.png)
-*Validação externa do IP atacante, confirmando reputação maliciosa.*
+### 2. Análise de Escopo (Scope Analysis)
+**P:** Outros usuários foram afetados além do `root`?
+**R:** Sim.
+* **Evidência:** Filtrando os logs no Kibana Discover pelo IP do atacante, identifiquei tentativas de login para diversos usuários genéricos, incluindo `admin`, `test`, `user`, `guest`. Isso indica um ataque de dicionário amplo (spray), e não um ataque direcionado a uma credencial específica.
 
-### 3. Resposta Automatizada
-Para garantir que esse tipo de incidente seja tratado formalmente, configurei a regra de detecção para acionar automaticamente o conector do **osTicket**.
-Agora, sempre que este alerta disparar, um ticket contendo os detalhes da investigação (Link do Alerta, IP, Usuário) será criado para a equipe de SOC.
+![Logs Brutos](images/69-discover-threat-analysis.png)
+*Análise de logs no Discover revelando o padrão de tentativa de múltiplos usuários.*
+
+### 3. Avaliação de Impacto (Containment)
+**P:** Alguma tentativa obteve sucesso?
+**R:** **Não.**
+* **Metodologia:** Realizei uma query de busca por `event.outcome: "success"` filtrando pelo IP do atacante. O retorno foi de **0 eventos**.
+
+**P:** Houve atividade pós-exploração?
+**R:** **N/A.** Como não houve sucesso no login, não houve execução de comandos ou movimentação lateral.
 
 ---
-
+**Conclusão da Análise:** Tentativa de acesso não autorizado falha. O bloqueio de firewall e senhas fortes foram eficazes. Incidente classificado como **Tentativa de Intrusão (Nível Baixo/Monitoramento)**.
