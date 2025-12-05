@@ -1,4 +1,4 @@
-# 🛡️ Building a SOC Home Lab: Detection & Response Project
+#  Building a SOC Home Lab: Detection & Response Project
 
 Este projeto documenta a construção de um Laboratório de Security Operations Center (SOC) para simular ataques reais e praticar Defesa Cibernética (Blue Team). O objetivo é implementar uma stack completa de monitoramento (ELK), ingerir logs de endpoints e desenvolver habilidades de detecção e resposta a incidentes.
 
@@ -678,5 +678,42 @@ Ao receber o alerta de **SSH Brute Force**, iniciei o processo manual de investi
 **P:** Houve atividade pós-exploração?
 **R:** **N/A.** Como não houve sucesso no login, não houve execução de comandos ou movimentação lateral.
 
----
+
 **Conclusão da Análise:** Tentativa de acesso não autorizado falha. O bloqueio de firewall e senhas fortes foram eficazes. Incidente classificado como **Tentativa de Intrusão (Nível Baixo/Monitoramento)**.
+---
+## 📌 Fase 18: Investigação Profunda e Encerramento (Dia 27-28)
+
+Após validar a tentativa de força bruta, aprofundei a investigação para responder à pergunta crítica: **"O ataque obteve sucesso?"**
+
+### 1. Caça ao Sucesso (Hunting for Success)
+Filtrei os logs no SIEM buscando pelo **Event ID 4624** (Login Sucesso) correlacionado com o IP do atacante identificado anteriormente.
+* **Resultado:** Localizei múltiplos eventos de sucesso às 12:37, coincidindo com o fim da tentativa de força bruta.
+* **Significado:** O atacante conseguiu descobrir a senha e comprometer a conta `Administrator`.
+
+![Sucesso Confirmado](images/72-investigation-success-found.png)
+*Identificação visual no Elastic: picos de eventos 4624 originados pelo IP do atacante.*
+
+### 2. Análise da Evidência
+Ao expandir os logs, confirmei os detalhes da intrusão. O sistema registrou o **Logon Type 10** (Acesso Remoto/RDP) ou **Logon Type 3** (Rede), validando que a credencial foi usada externamente.
+
+![Detalhes do Log](images/73-evidence-log-details.png)
+*Detalhes do evento mostrando o acesso bem-sucedido à conta de Administrador.*
+
+### 3. Contenção e Documentação
+Com a confirmação da invasão, iniciei o protocolo de resposta a incidentes:
+1.  **Criação de Ticket:** Registrei o incidente no **osTicket** detalhando a detecção.
+2.  **Mitigação:** (Simulado) Reset da senha de Administrador e bloqueio do IP no Firewall.
+3.  **Conclusão:** O ticket foi atualizado com as evidências e marcado como "Fechado".
+
+![Criação do Ticket](images/74-incident-ticket-creation.png)
+*Registro formal do incidente no sistema de tickets para rastreabilidade.*
+
+---
+**STATUS ATUAL DO PROJETO:**
+O ciclo manual de ataque e defesa foi concluído.
+* **Ataque:** Realizado (Brute Force).
+* **Detecção:** Confirmada (Elastic SIEM).
+* **Gestão:** Documentada (osTicket).
+
+![Fila de Tickets](images/75-ticket-queue-status.png)
+*Visão da fila de tickets demonstrando o fluxo de trabalho do analista.*
