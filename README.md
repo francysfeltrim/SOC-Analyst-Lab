@@ -690,7 +690,7 @@ Filtrei os logs no SIEM buscando pelo **Event ID 4624** (Login Sucesso) correlac
 * **Resultado:** Localizei múltiplos eventos de sucesso às 12:37, coincidindo com o fim da tentativa de força bruta.
 * **Significado:** O atacante conseguiu descobrir a senha e comprometer a conta `Administrator`.
 
-![Sucesso Confirmado](images/72-investigation-success-found.png)
+![Sucesso Confirmado](images/72-investigation-success-found.pgn)
 *Identificação visual no Elastic: picos de eventos 4624 originados pelo IP do atacante.*
 
 ### 2. Análise da Evidência
