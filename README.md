@@ -681,7 +681,7 @@ Ao receber o alerta de **SSH Brute Force**, iniciei o processo manual de investi
 ---
 **Conclusão da Análise:** Tentativa de acesso não autorizado falha. O bloqueio de firewall e senhas fortes foram eficazes. Incidente classificado como **Tentativa de Intrusão (Nível Baixo/Monitoramento)**.
 ---
-## 📌 Fase 18: Investigação Profunda e Encerramento (Dia 27-28)
+## 📌 Fase 18: Investigação Profunda e Encerramento
 
 Após validar a tentativa de força bruta, aprofundei a investigação para responder à pergunta crítica: **"O ataque obteve sucesso?"**
 
