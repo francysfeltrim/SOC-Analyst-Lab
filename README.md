@@ -728,7 +728,8 @@ Comando: sudo nmap -sS -T4 -p- -v [IP_DO_ALVO]
 
 Resultado: O scan identificou portas críticas abertas (como 3389/RDP e 135/RPC), confirmando a exposição do servidor. 
 
-![Terminal do Kali Linux executando a varredura de portas contra o alvo e descobrindo serviços](images/76-nmap-scan-kali..png)
+(images/76-nmap-scan-kali..png)
+*Terminal do Kali Linux executando a varredura de portas contra o alvo e descobrindo serviços.*
 
 
 📌 Fase 20: Simulação de Ameaça Avançada (PowerShell/C2)
@@ -737,12 +738,14 @@ Após o reconhecimento, avancei para uma técnica de pós-exploração: a execu�
 1. O Ataque (Payload)
 Executei um comando codificado em Base64 no servidor vítima. O objetivo era testar se o SIEM conseguiria decodificar ou alertar sobre a execução, e não apenas ler o texto plano.
 
-Terminal do Windows Server simulando a execução do comando malicioso encoded (Base64).
+(images/77-powershell-attack-cmd.png)
+*Terminal do Windows Server simulando a execução do comando malicioso encoded (Base64).*
 
 2. A Detecção
 A regra customizada que criei, MyDFIR - PowerShell Encoded Command, identificou o padrão suspeito nos logs de processo (process.command_line) imediatamente após a execução.
 
-Painel de Alertas do Elastic confirmando a detecção do PowerShell com severidade Média.
+(images/78-elastic-alert-detection.png)
+*Painel de Alertas do Elastic confirmando a detecção do PowerShell com severidade Média.*
 
 📌 Fase 21: Implementação de SOAR (Automação e Resposta)
 Para reduzir o tempo de resposta a incidentes (MTTR), construí um playbook de automação na plataforma Tines, integrando-a ao Elastic SIEM via Webhook.
@@ -756,12 +759,14 @@ Tratamento (JSON Parse): Limpa os dados brutos e extrai campos vitais (Host, Usu
 
 Ação de Resposta: Envia um e-mail formatado dinamicamente para o analista de SOC.
 
-Fluxo de automação no Tines conectando a detecção (Webhook) à resposta (Email).
+(images/79-tines-storyboard-flow.png)
+*Fluxo de automação no Tines conectando a detecção (Webhook) à resposta (Email).*
 
 2. Validação End-to-End (Resultado)
 O teste final confirmou o sucesso da integração. Segundos após o ataque de PowerShell ser detectado, o sistema de automação processou o evento e entregou o alerta detalhado na caixa de entrada.
 
-Notificação recebida com sucesso: mostra a regra disparada, o host afetado e o comando exato.
+(images/80-email-notification-success.png)
+*Notificação recebida com sucesso: mostra a regra disparada, o host afetado e o comando exato.*
 
 📌 Fase 22: Conclusão e Visibilidade Global
 O projeto foi finalizado com a consolidação de todas as fontes de dados em um Dashboard Executivo, provendo Consciência Situacional (Situational Awareness) sobre o ambiente monitorado.
@@ -769,4 +774,5 @@ O projeto foi finalizado com a consolidação de todas as fontes de dados em um 
 1. Mapa de Ameaças
 O painel geográfico registrou a origem dos ataques globais (SSH/RDP) contidos pelo Honeypot, permitindo identificar padrões de ataque por país, enquanto as métricas internas monitoravam a saúde dos endpoints.
 
-Visão geral do SOC: Mapa de ataques em tempo real e volumetria de eventos de segurança.
+(images/81-final-soc-dashboard.png)
+*Visão geral do SOC: Mapa de ataques em tempo real e volumetria de eventos de segurança.*
