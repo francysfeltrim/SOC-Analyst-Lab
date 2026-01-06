@@ -717,3 +717,60 @@ O ciclo manual de ataque e defesa foi concluído.
 
 ![Fila de Tickets](images/75-ticket-queue-status.png)
 *Visão da fila de tickets demonstrando o fluxo de trabalho do analista.*
+
+📌 Fase 19: Implementação de SOAR (Security Orchestration, Automation and Response)
+Para reduzir o tempo de resposta (MTTR), integrei o Elastic SIEM a uma plataforma SOAR (Tines). O objetivo foi automatizar a notificação de alertas críticos, eliminando a necessidade de monitoramento visual constante.
+
+1. Construção do Storyboard
+Criei um fluxo de automação composto por três estágios principais:
+
+Webhook: Recebimento do alerta enviado pelo Elastic.
+
+Data Parsing: Tratamento do JSON bruto para extrair campos vitais (Nome da Regra, Host, Usuário, Comando Malicioso).
+
+Action (Email): Envio dinâmico de notificação para o analista.
+
+Arquitetura da automação no Tines conectando o SIEM ao sistema de notificação.
+
+📌 Fase 20: Simulação de Ameaça Avançada (PowerShell/C2)
+Diferente do ataque de força bruta (barulhento), simulei uma técnica mais furtiva e comum em estágios de pós-exploração: a execução de comandos codificados em Base64 via PowerShell (T1059.001 no MITRE ATT&CK).
+
+1. O Ataque
+Utilizei um payload codificado para ofuscar o comando malicioso, tentando evadir detecções baseadas em assinaturas simples de texto.
+
+PowerShell
+
+powershell.exe -EncodedCommand JABzACAAPQAgAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABJAE8ALgBNAGUAbQBvAHIAeQBTAHQAcgBlAGEAbQAoAFsAQwBvAG4AdgBlAHIAdABdADoAOgBGAH...
+(Nota: O comando real foi executado no ambiente controlado).
+
+2. A Detecção (Regra Customizada)
+Configurei uma regra de detecção no Elastic baseada na query process.command_line: *EncodedCommand*. A regra identificou a anomalia imediatamente após a execução.
+
+SIEM detectando a execução do processo suspeito via command line.
+
+📌 Fase 21: Validação do Ciclo Completo (End-to-End)
+O teste final consistiu em disparar o ataque e verificar se a automação funcionaria sem intervenção humana.
+
+1. Resultado da Automação
+Segundos após a detecção no Elastic, o Tines processou o evento e enviou um e-mail formatado contendo os detalhes críticos do incidente. Isso prova a capacidade de resposta em tempo real.
+
+E-mail recebido automaticamente contendo a regra disparada, o usuário e o comando malicioso.
+
+📌 Fase 22: Reporting e Encerramento
+Para finalizar o laboratório e garantir a preservação das evidências forenses, gerei relatórios dos incidentes confirmados.
+
+1. Exportação de Dados
+Filtrei os logs no Discover para isolar apenas os eventos de alta fidelidade (PowerShell Encoded e Sucesso de Login) e exportei os dados em formato CSV para auditoria futura.
+
+Filtro aplicado no Discover para exportação das evidências finais.
+
+🏁 Conclusão do Projeto
+O laboratório demonstrou com sucesso a criação de um ecossistema de segurança defensiva funcional, cobrindo:
+
+Ingestão de Logs: Windows e Linux enviando telemetria para a nuvem.
+
+Visibilidade: Dashboards e Mapas em tempo real.
+
+Detecção: Regras para Brute Force e Execução de Processos.
+
+Resposta: Automação via SOAR para alertas imediatos.
