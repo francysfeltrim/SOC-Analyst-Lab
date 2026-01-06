@@ -738,13 +738,13 @@ Após o reconhecimento, avancei para uma técnica de pós-exploração: a execu�
 1. O Ataque (Payload)
 Executei um comando codificado em Base64 no servidor vítima. O objetivo era testar se o SIEM conseguiria decodificar ou alertar sobre a execução, e não apenas ler o texto plano.
 
-(images/77-powershell-attack-cmd.png)
+![20.1](images/77-powershell-attack-cmd.png)
 *Terminal do Windows Server simulando a execução do comando malicioso encoded (Base64).*
 
 2. A Detecção
 A regra customizada que criei, MyDFIR - PowerShell Encoded Command, identificou o padrão suspeito nos logs de processo (process.command_line) imediatamente após a execução.
 
-(images/78-elastic-alert-detection.png)
+![20.2](images/78-elastic-alert-detection.png)
 *Painel de Alertas do Elastic confirmando a detecção do PowerShell com severidade Média.*
 
 📌 Fase 21: Implementação de SOAR (Automação e Resposta)
@@ -759,13 +759,13 @@ Tratamento (JSON Parse): Limpa os dados brutos e extrai campos vitais (Host, Usu
 
 Ação de Resposta: Envia um e-mail formatado dinamicamente para o analista de SOC.
 
-(images/79-tines-storyboard-flow.png)
+![21.1](images/79-tines-storyboard-flow.png)
 *Fluxo de automação no Tines conectando a detecção (Webhook) à resposta (Email).*
 
 2. Validação End-to-End (Resultado)
 O teste final confirmou o sucesso da integração. Segundos após o ataque de PowerShell ser detectado, o sistema de automação processou o evento e entregou o alerta detalhado na caixa de entrada.
 
-(images/80-email-notification-success.png)
+![21.2](images/80-email-notification-success.png)
 *Notificação recebida com sucesso: mostra a regra disparada, o host afetado e o comando exato.*
 
 📌 Fase 22: Conclusão e Visibilidade Global
@@ -774,5 +774,5 @@ O projeto foi finalizado com a consolidação de todas as fontes de dados em um 
 1. Mapa de Ameaças
 O painel geográfico registrou a origem dos ataques globais (SSH/RDP) contidos pelo Honeypot, permitindo identificar padrões de ataque por país, enquanto as métricas internas monitoravam a saúde dos endpoints.
 
-(images/81-final-soc-dashboard.png)
+![22.1](images/81-final-soc-dashboard.png)
 *Visão geral do SOC: Mapa de ataques em tempo real e volumetria de eventos de segurança.*
