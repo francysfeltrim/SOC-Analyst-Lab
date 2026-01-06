@@ -718,59 +718,55 @@ O ciclo manual de ataque e defesa foi concluído.
 ![Fila de Tickets](images/75-ticket-queue-status.png)
 *Visão da fila de tickets demonstrando o fluxo de trabalho do analista.*
 
-📌 Fase 19: Implementação de SOAR (Security Orchestration, Automation and Response)
-Para reduzir o tempo de resposta (MTTR), integrei o Elastic SIEM a uma plataforma SOAR (Tines). O objetivo foi automatizar a notificação de alertas críticos, eliminando a necessidade de monitoramento visual constante.
+📌 Fase 19: Reconhecimento Ativo e Varredura (Network Scanning)
+Antes de executar ataques complexos, simulei uma etapa de reconhecimento usando o Nmap a partir de uma máquina atacante (Kali Linux). O objetivo foi identificar portas abertas e serviços vulneráveis no servidor Windows alvo, simulando como um atacante real mapearia a rede.
 
-1. Construção do Storyboard
-Criei um fluxo de automação composto por três estágios principais:
+1. Execução do Scan
+Utilizei a flag -sS (SYN Scan) para uma varredura rápida, buscando todas as portas TCP (-p-) com alta velocidade (-T4).
 
-Webhook: Recebimento do alerta enviado pelo Elastic.
+Comando: sudo nmap -sS -T4 -p- -v [IP_DO_ALVO]
 
-Data Parsing: Tratamento do JSON bruto para extrair campos vitais (Nome da Regra, Host, Usuário, Comando Malicioso).
+Resultado: O scan identificou portas críticas abertas (como 3389/RDP e 135/RPC), confirmando a exposição do servidor. 
 
-Action (Email): Envio dinâmico de notificação para o analista.
+![Terminal do Kali Linux executando a varredura de portas contra o alvo e descobrindo serviços](images/76-nmap-scan-kali.png)
 
-Arquitetura da automação no Tines conectando o SIEM ao sistema de notificação.
 
 📌 Fase 20: Simulação de Ameaça Avançada (PowerShell/C2)
-Diferente do ataque de força bruta (barulhento), simulei uma técnica mais furtiva e comum em estágios de pós-exploração: a execução de comandos codificados em Base64 via PowerShell (T1059.001 no MITRE ATT&CK).
+Após o reconhecimento, avancei para uma técnica de pós-exploração: a execução de comandos ofuscados (Encoded) via PowerShell. Esta técnica é mapeada no MITRE ATT&CK como T1059.001 e é frequentemente usada por malwares para esconder scripts maliciosos de antivírus tradicionais.
 
-1. O Ataque
-Utilizei um payload codificado para ofuscar o comando malicioso, tentando evadir detecções baseadas em assinaturas simples de texto.
+1. O Ataque (Payload)
+Executei um comando codificado em Base64 no servidor vítima. O objetivo era testar se o SIEM conseguiria decodificar ou alertar sobre a execução, e não apenas ler o texto plano.
 
-PowerShell
+Terminal do Windows Server simulando a execução do comando malicioso encoded (Base64).
 
-powershell.exe -EncodedCommand JABzACAAPQAgAE4AZQB3AC0ATwBiAGoAZQBjAHQAIABJAE8ALgBNAGUAbQBvAHIAeQBTAHQAcgBlAGEAbQAoAFsAQwBvAG4AdgBlAHIAdABdADoAOgBGAH...
-(Nota: O comando real foi executado no ambiente controlado).
+2. A Detecção
+A regra customizada que criei, MyDFIR - PowerShell Encoded Command, identificou o padrão suspeito nos logs de processo (process.command_line) imediatamente após a execução.
 
-2. A Detecção (Regra Customizada)
-Configurei uma regra de detecção no Elastic baseada na query process.command_line: *EncodedCommand*. A regra identificou a anomalia imediatamente após a execução.
+Painel de Alertas do Elastic confirmando a detecção do PowerShell com severidade Média.
 
-SIEM detectando a execução do processo suspeito via command line.
+📌 Fase 21: Implementação de SOAR (Automação e Resposta)
+Para reduzir o tempo de resposta a incidentes (MTTR), construí um playbook de automação na plataforma Tines, integrando-a ao Elastic SIEM via Webhook.
 
-📌 Fase 21: Validação do Ciclo Completo (End-to-End)
-O teste final consistiu em disparar o ataque e verificar se a automação funcionaria sem intervenção humana.
+1. Arquitetura do Playbook
+O fluxo foi desenhado para agir sem intervenção humana:
 
-1. Resultado da Automação
-Segundos após a detecção no Elastic, o Tines processou o evento e enviou um e-mail formatado contendo os detalhes críticos do incidente. Isso prova a capacidade de resposta em tempo real.
+Webhook: Recebe o alerta JSON enviado pelo Elastic.
 
-E-mail recebido automaticamente contendo a regra disparada, o usuário e o comando malicioso.
+Tratamento (JSON Parse): Limpa os dados brutos e extrai campos vitais (Host, Usuário, Comando Malicioso).
 
-📌 Fase 22: Reporting e Encerramento
-Para finalizar o laboratório e garantir a preservação das evidências forenses, gerei relatórios dos incidentes confirmados.
+Ação de Resposta: Envia um e-mail formatado dinamicamente para o analista de SOC.
 
-1. Exportação de Dados
-Filtrei os logs no Discover para isolar apenas os eventos de alta fidelidade (PowerShell Encoded e Sucesso de Login) e exportei os dados em formato CSV para auditoria futura.
+Fluxo de automação no Tines conectando a detecção (Webhook) à resposta (Email).
 
-Filtro aplicado no Discover para exportação das evidências finais.
+2. Validação End-to-End (Resultado)
+O teste final confirmou o sucesso da integração. Segundos após o ataque de PowerShell ser detectado, o sistema de automação processou o evento e entregou o alerta detalhado na caixa de entrada.
 
-🏁 Conclusão do Projeto
-O laboratório demonstrou com sucesso a criação de um ecossistema de segurança defensiva funcional, cobrindo:
+Notificação recebida com sucesso: mostra a regra disparada, o host afetado e o comando exato.
 
-Ingestão de Logs: Windows e Linux enviando telemetria para a nuvem.
+📌 Fase 22: Conclusão e Visibilidade Global
+O projeto foi finalizado com a consolidação de todas as fontes de dados em um Dashboard Executivo, provendo Consciência Situacional (Situational Awareness) sobre o ambiente monitorado.
 
-Visibilidade: Dashboards e Mapas em tempo real.
+1. Mapa de Ameaças
+O painel geográfico registrou a origem dos ataques globais (SSH/RDP) contidos pelo Honeypot, permitindo identificar padrões de ataque por país, enquanto as métricas internas monitoravam a saúde dos endpoints.
 
-Detecção: Regras para Brute Force e Execução de Processos.
-
-Resposta: Automação via SOAR para alertas imediatos.
+Visão geral do SOC: Mapa de ataques em tempo real e volumetria de eventos de segurança.
