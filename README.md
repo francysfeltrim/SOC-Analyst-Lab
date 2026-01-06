@@ -728,7 +728,7 @@ Comando: sudo nmap -sS -T4 -p- -v [IP_DO_ALVO]
 
 Resultado: O scan identificou portas críticas abertas (como 3389/RDP e 135/RPC), confirmando a exposição do servidor. 
 
-![Terminal do Kali Linux executando a varredura de portas contra o alvo e descobrindo serviços](images/76-nmap-scan-kali.png)
+![Terminal do Kali Linux executando a varredura de portas contra o alvo e descobrindo serviços](images/76-nmap-scan-kali..png)
 
 
 📌 Fase 20: Simulação de Ameaça Avançada (PowerShell/C2)
